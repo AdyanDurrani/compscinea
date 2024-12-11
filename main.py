@@ -11,7 +11,10 @@ detector = apriltag.Detector()
 #Recieves a videocapture from camera 0
 cap = cv.VideoCapture(0)
 
-
+#Tabs for the song
+song = [0,3,5,0,3,6,5,0,3,5,3,0]
+#Starting note
+n=0
 
 def get_tag_distance(nut, bridge):
     #Checks if the tags exist
@@ -34,7 +37,7 @@ def dist_of_fret(scale_len, fret):
 if not cap.isOpened():
     print("Camera not being read")
     exit()
-n = 23
+
 #Main loop
 while True:
     #reads cam
@@ -70,11 +73,13 @@ while True:
             bridgemarker = detections[0]
 
         locationnut,locationbridge, distancex, distancey = (get_tag_distance(nutmarker, bridgemarker))
-        distance = dist_of_fret(distancex, 1)
+       
+       #fret number is now the note number of the song
+        distance = dist_of_fret(distancex, song[n])
 
 
-        
-        image = cv.circle(image,(int(locationbridge[0]+distance), int(locationbridge[1])), 5, (0,255,255), -1)
+        #Draws a circle on the correct fret
+        image = cv.circle(image,(int(locationbridge[0]+distance+30), int(locationbridge[1])), 5, (0,255,255), -1)
 
 
 
@@ -87,7 +92,11 @@ while True:
     #exits when keyboard "q" is pressed
     if cv.waitKey(1) == ord("q"):
         break
-    #time.sleep(1)
+    #advances the song if keyboard "a" is pressed
+    elif cv.waitKey() == ord("a"):
+        n+=1
+    
+
 #stops recieving cam feed
 cap.release()
 #closes all windows
