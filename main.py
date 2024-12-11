@@ -12,7 +12,7 @@ detector = apriltag.Detector()
 cap = cv.VideoCapture(0)
 
 #Tabs for the song
-song = [0,3,5,0,3,6,5,0,3,5,3,0]
+song = [0,3,5,0,3,6,5,0,3,5,3,0]["E","E","E","E","E","E","E","E","E","E","E","E"]
 #Starting note
 n=0
 
@@ -75,14 +75,16 @@ while True:
         locationnut,locationbridge, distancex, distancey = (get_tag_distance(nutmarker, bridgemarker))
        
        #fret number is now the note number of the song
-        distance = dist_of_fret(distancex, song[n])
+        distance = dist_of_fret(distancex, song[0][n])
 
 
         #Draws a circle on the correct fret
         image = cv.circle(image,(int(locationbridge[0]+distance+30), int(locationbridge[1])), 5, (0,255,255), -1)
 
         #Adds text saying which fret to play
-        image = cv.putText(image, f'fret: {song[n]}', (0,30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 2, cv.LINE_AA)
+        image = cv.putText(image, f'fret: {song[0][n]}', (0,30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 2, cv.LINE_AA)
+	#Adds text saying which string to play
+        image = cv.putText(image, f'string: {song[1][n]}', (0,60), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 2, cv.LINE_AA)
 
 
 
