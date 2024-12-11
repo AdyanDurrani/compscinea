@@ -12,7 +12,7 @@ detector = apriltag.Detector()
 cap = cv.VideoCapture(0)
 
 #Tabs for the song
-song = [0,3,5,0,3,6,5,0,3,5,3,0]["E","E","E","E","E","E","E","E","E","E","E","E"]
+song = [[0,3,5,0,3,6,5,0,3,5,3,0],["E","E","E","E","E","E","E","E","E","E","E","E"]]
 #Starting note
 n=0
 
