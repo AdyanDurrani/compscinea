@@ -81,6 +81,9 @@ while True:
         #Draws a circle on the correct fret
         image = cv.circle(image,(int(locationbridge[0]+distance+30), int(locationbridge[1])), 5, (0,255,255), -1)
 
+        #Adds text saying which fret to play
+        image = cv.putText(image, f'fret: {song[n]}', (0,30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 2, cv.LINE_AA)
+
 
 
     
