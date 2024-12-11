@@ -3,6 +3,7 @@ import apriltag
 
 nut_id = 10
 bridge_id = 11
+scale_len = 25
 
 # setup the detector
 detector = apriltag.Detector()
@@ -18,24 +19,27 @@ def get_tag_distance(nut, bridge):
     #Loads tag coordinates into variables
         locationnut = nut.corners[0]
         locationbridge = bridge.corners[1]
-        #Distance is calculated using pythagerous theorum 
-        distance = (((locationnut[0] - locationbridge[0]) ** 2) + (locationnut[1] -locationbridge[1]) ** 2) ** 0.5
-        return (locationnut[0],locationnut[1]), (locationbridge[0], locationbridge[1]), distance
+        distancex = locationnut[0] - locationbridge[0]
+        distancey = locationnut[1] - locationbridge[1]
+        return (locationnut[0],locationnut[1]), (locationbridge[0], locationbridge[1]), distancex, distancey
 
     else:
         return None
 
 
+def dist_of_fret(scale_len, fret):
+	return scale_len / (2 ** (fret/12) )
+
 #Checks if the camera can be opened
 if not cap.isOpened():
     print("Camera not being read")
     exit()
-
+n = 23
 #Main loop
 while True:
     #reads cam
     ret, image = cap.read()
-    image = cv.imread(cv.samples.findFile("guitar.jpg"))
+    image = cv.imread(cv.samples.findFile("guitarfixed.jpg"))
     #converts image to greyscale.
     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     
@@ -65,12 +69,17 @@ while True:
             nutmarker = detections[1]
             bridgemarker = detections[0]
 
-        l1,l2,distance = (get_tag_distance(nutmarker, bridgemarker))
+        locationnut,locationbridge, distancex, distancey = (get_tag_distance(nutmarker, bridgemarker))
+        distance = dist_of_fret(distancex, 1)
+
+
         
-        cv.line(image,(int(l1[0]),int(l1[1])),(int(l2[0]), int(l2[1])),(255,0,0),5)
+        image = cv.circle(image,(int(locationbridge[0]+distance), int(locationbridge[1])), 5, (0,255,255), -1)
+
+
 
     
-    image = cv.flip(image,1)
+    #image = cv.flip(image,1)
 
     #Displays the camera feed
     cv.imshow('Result', image)
@@ -78,7 +87,7 @@ while True:
     #exits when keyboard "q" is pressed
     if cv.waitKey(1) == ord("q"):
         break
-
+    #time.sleep(1)
 #stops recieving cam feed
 cap.release()
 #closes all windows
