@@ -90,7 +90,7 @@ while True:
     cv.imshow('Result', image)
 
     #exits when keyboard "q" is pressed
-    if cv.waitKey(1) == ord("q"):
+    if cv.waitKey(0) == ord("q"):
         break
     #advances the song if keyboard "a" is pressed
     elif cv.waitKey() == ord("a"):
