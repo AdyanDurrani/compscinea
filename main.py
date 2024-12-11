@@ -89,11 +89,13 @@ while True:
     #Displays the camera feed
     cv.imshow('Result', image)
 
+    key = cv.waitKey()
+
     #exits when keyboard "q" is pressed
-    if cv.waitKey(0) == ord("q"):
+    if key == ord("q"):
         break
     #advances the song if keyboard "a" is pressed
-    elif cv.waitKey() == ord("a"):
+    if key == ord("a"):
         n+=1
     
 
