@@ -1,5 +1,14 @@
 import cv2 as cv
 import apriltag
+import pygame
+
+# pygame setup
+pygame.init()
+screen = pygame.display.set_mode((1280, 720))
+clock = pygame.time.Clock()
+running = True
+
+
 
 nut_id = 10
 bridge_id = 11
@@ -38,11 +47,13 @@ if not cap.isOpened():
     print("Camera not being read")
     exit()
 
+running = True
+
 #Main loop
-while True:
+while running:
     #reads cam
     ret, image = cap.read()
-    image = cv.imread(cv.samples.findFile("guitarfixed.jpg"))
+    #image = cv.imread(cv.samples.findFile("guitarfixed.jpg"))
     #converts image to greyscale.
     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     
@@ -83,26 +94,39 @@ while True:
 
         #Adds text saying which fret to play
         image = cv.putText(image, f'fret: {song[0][n]}', (0,30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 2, cv.LINE_AA)
-	#Adds text saying which string to play
+	    #Adds text saying which string to play
         image = cv.putText(image, f'string: {song[1][n]}', (0,60), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 2, cv.LINE_AA)
 
-
-
     
+    # poll for events
+    # pygame.QUIT event means the user clicked X to close your window
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if button.collidepoint(mouse_pos):
+                print("Booty cheeks")
+                n+=1
+    
+
+    # fill the screen with a color to wipe away anything from last frame
+    screen.fill("Orange")
+
+    # RENDER YOUR GAME HERE
+    button = pygame.Rect(50,50,50,50)
+    pygame.draw.rect(screen, "Red", button)
+    # flip() the display to put your work on screen
+    pygame.display.flip()
+
+    mouse_pos = pygame.mouse.get_pos()
+
     #image = cv.flip(image,1)
 
     #Displays the camera feed
     cv.imshow('Result', image)
 
-    key = cv.waitKey()
 
-    #exits when keyboard "q" is pressed
-    if key == ord("q"):
-        break
-    #advances the song if keyboard "a" is pressed
-    if key == ord("a"):
-        n+=1
-    
+    clock.tick(60)  # limits FPS to 60
 
 #stops recieving cam feed
 cap.release()
