@@ -1,13 +1,29 @@
 import cv2 as cv
 import apriltag
 import pygame
+from urllib.request import urlopen
+import numpy as np
 
+def url_to_image(url, readFlag=cv.IMREAD_COLOR):
+    # download the image, convert it to a NumPy array, and then read
+    # it into OpenCV format
+    resp = urlopen(url)
+    image = np.asarray(bytearray(resp.read()), dtype="uint8")
+    image = cv.imdecode(image, readFlag)
+
+    # return the image
+    return image
+
+cat = url_to_image('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9jXOE7IX7YnKW_OZtFe9yo1qEOdfxoP7gsw&s')
 # pygame setup
 pygame.init()
-screen = pygame.display.set_mode((1280, 720))
+screen = pygame.display.set_mode((500, 500))
 clock = pygame.time.Clock()
 running = True
 
+font = pygame.font.SysFont("copperplategothic", 20, True, True)
+
+cat= cv.resize(cat,(200,300))
 
 
 nut_id = 10
@@ -21,7 +37,19 @@ detector = apriltag.Detector()
 cap = cv.VideoCapture(0)
 
 #Tabs for the song
-song = [[0,3,5,0,3,6,5,0,3,5,3,0],["E","E","E","E","E","E","E","E","E","E","E","E"]]
+f = open("songs.txt")
+
+E = "E"
+A = "A"
+D = "D"
+G = "G"
+B = "B"
+e = "e"
+
+songs= [["Smoke on the Water - Deep Purple", [0,3,5,0,3,6,5,0,3,5,3,0], [E,E,E,E,E,E,E,E,E,E,E,E]],
+        ["Buddy Holly - Weezer"], [4,5,4,6,8,6,4,5,4], [e,B,e,e,e,e,B,B]]
+
+
 #Starting note
 n=0
 
@@ -51,9 +79,12 @@ running = True
 
 #Main loop
 while running:
+
+    mouse_pos = pygame.mouse.get_pos()
+
     #reads cam
     ret, image = cap.read()
-    #image = cv.imread(cv.samples.findFile("guitarfixed.jpg"))
+    image = cv.imread(cv.samples.findFile("guitarfixed.jpg"))
     #converts image to greyscale.
     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     
@@ -86,16 +117,16 @@ while running:
         locationnut,locationbridge, distancex, distancey = (get_tag_distance(nutmarker, bridgemarker))
        
        #fret number is now the note number of the song
-        distance = dist_of_fret(distancex, song[0][n])
+        distance = dist_of_fret(distancex, songs[0][1][n])
 
 
         #Draws a circle on the correct fret
         image = cv.circle(image,(int(locationbridge[0]+distance+30), int(locationbridge[1])), 5, (0,255,255), -1)
 
         #Adds text saying which fret to play
-        image = cv.putText(image, f'fret: {song[0][n]}', (0,30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 2, cv.LINE_AA)
+        image = cv.putText(image, f'fret: {songs[0][1][n]}', (0,30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 2, cv.LINE_AA)
 	    #Adds text saying which string to play
-        image = cv.putText(image, f'string: {song[1][n]}', (0,60), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 2, cv.LINE_AA)
+        image = cv.putText(image, f'string: {songs[0][2][n]}', (0,60), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 2, cv.LINE_AA)
 
     
     # poll for events
@@ -103,30 +134,66 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if button.collidepoint(mouse_pos):
-                print("Booty cheeks")
+            #If when the mouse is clicked and mouse is in the box run the code
+            if next.collidepoint(mouse_pos):
+                #Increments the note
                 n+=1
-    
+                #If the end of the song was reached, loop back
+                if n == len(songs[0][1]):
+                    n=0
+
+            elif prev.collidepoint(mouse_pos):
+                #decrements the note
+                n-=1
+                #if reversed all the way to the start of the song, keep it there
+                if n == -1:
+                    n = 0
+            
+
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("Orange")
 
-    # RENDER YOUR GAME HERE
-    button = pygame.Rect(50,50,50,50)
-    pygame.draw.rect(screen, "Red", button)
+    #Draws the next button
+    next = pygame.Rect(150,50,50,50)
+
+    pygame.draw.rect(screen, "Red", next)
+    screen.blit(font.render("Next ->", True, (0,0,0)), (150,50), )
+
+    #Draws the previous button
+    prev = pygame.Rect(50,50,75,50)
+
+    pygame.draw.rect(screen, "Red", prev)
+    screen.blit(font.render("<- Previous", True, (0,0,0)), (50,50))
+
+    #Change the colour of the button when hovered over
+    if prev.collidepoint(mouse_pos):
+        pygame.draw.rect(screen, (100,0,0), prev)
+        screen.blit(font.render("<- Previous", True, (0,0,0)), (50,50), )    
+
+    elif next.collidepoint(mouse_pos):
+        pygame.draw.rect(screen, (100,0,0), next)
+        screen.blit(font.render("Next ->", True, (0,0,0)), (150,50), )
+    
+    #screen.blit(font.render(f"Fret: {songs[0][1][n]}", False, (0,0,0)), (50,200), )
+    #screen.blit(font.render(f"String: {songs[0][2][n]}", False, (0,0,0)), (50,200), )
+
+
     # flip() the display to put your work on screen
     pygame.display.flip()
 
-    mouse_pos = pygame.mouse.get_pos()
+    
 
     #image = cv.flip(image,1)
+    #width = image.shape[1]
 
+    #image[0:100, width-100:width] = cat[0:100, 0:100]
     #Displays the camera feed
     cv.imshow('Result', image)
 
 
-    clock.tick(60)  # limits FPS to 60
 
 #stops recieving cam feed
 cap.release()
